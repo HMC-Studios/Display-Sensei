@@ -1,0 +1,46 @@
+# Display Sensei
+
+<img src="icon.png" width="64" alt="Display Sensei icon">
+
+A Blockbench plugin for Minecraft: Bedrock Edition.
+
+Set how Minecraft Bedrock blocks display: held in first and third person, in item frames, on the ground, on shelves, in flower pots, in the inventory and on the head.
+
+For Bedrock, Blockbench's own Display Mode only covers block models. Display Sensei adds Bedrock reference models and poses, matching first person to third person, the hand holds of 3D items (attachables), and armor on players and mobs.
+
+## Usage
+
+Open a Bedrock Block or Bedrock Entity project, then choose **Tools > Display Sensei**.
+
+- **Hand:** how a block or a 3D item (attachable) sits in the hand, in first and third person, in both hands.
+- **World, Inventory:** the other display contexts of a Bedrock Block model, against Bedrock reference models.
+- **Armor:** see a worn piece on a player, armor stand or mob, fix bone names and pivots, and test poses.
+- **Output:** the geometry output, the pack files of the open model, and writing a 3D item's holds into its hold file.
+
+### World
+
+![World tab: Ground, Item Frame, Shelf and Flower Pot](images/world.png)
+
+### Inventory
+
+![Inventory tab: GUI](images/inventory.png)
+
+### Armor
+
+![Armor tab: a chest piece on the player](images/armor.png)
+
+### Output
+
+![Output tab: the pack files and the geometry output](images/output.png)
+
+## Install
+
+Needs Blockbench 5.2 or newer. Drag `display_sensei.js` into Blockbench, or choose **File > Plugins...** and **Load Plugin from File**.
+
+## Build
+
+With Node.js, `node build.js` writes `display_sensei.js` from `src/`, `lang/` and `icon.png`.
+
+## License
+
+MIT. See [LICENSE](LICENSE).

@@ -296,7 +296,6 @@ const DS_TRANSLATIONS = {
         "display_sensei.message.left_hand_inherits": "The left hand uses Bedrock's default, not a mirror of the right.",
         "display_sensei.message.item_wizard_compile": "The Item Wizard is building its 3D item model from this project. Display Sensei left item_display_transforms out of that model: an attachable is placed in the hand by its hold animations, not by display transforms.",
         "display_sensei.message.block_wizard_version": "The Block Wizard saves this geometry with format_version 1.21.110 when it has display transforms. {features} After exporting to a folder or into a pack, press Ctrl+S in this project: the wizard points this project's save path at the geometry it wrote, and Display Sensei saves it again with the version it needs.",
-        "display_sensei.message.file_dates_permission": "Display Sensei only reads when your pack files were last written, to show the dates on its Output tab. It never changes these files.",
         "display_sensei.message.armor_pose_edit_mode": "The pose test runs in Edit mode only.",
         "display_sensei.message.armor_fix_failed": "This fix could not be applied to the model as it is now.",
         "display_sensei.message.armor_bake_failed": "Nothing was baked: there are no offsets, or they could not be written into the model.",
@@ -340,17 +339,12 @@ const DS_TRANSLATIONS = {
         "display_sensei.link.maybe_game_detail": "the game's own, or missing",
         "display_sensei.link.bp_unknown_detail": "not checked: behavior pack not found",
         "display_sensei.link.bp_ambiguous_detail": "not checked: several behavior packs match",
-        "display_sensei.link.date": "last written {date}",
         "display_sensei.link.rewritten": "Wizard rewrites",
         "display_sensei.link.rewritten_hint_item": "The Item Wizard's Export to Folder writes this file again. Integrate into Pack writes it again too, except the shared lists, which it merges with yours (item_texture.json, the language file), and the manifests and pack icons, which it leaves as they are apart from adding its stamp.",
         "display_sensei.link.rewritten_hint_block": "The Block Wizard's Export to Folder writes this file again. Integrate into Pack writes it again too, the model and its textures included, except the shared lists, which it merges with yours (terrain_texture.json, flipbook_textures.json, blocks.json, the language file), and the manifests and pack icons, which it leaves as they are apart from adding its stamp.",
         "display_sensei.link.rewritten_hint_entity": "The Entity Wizard's Export to Folder writes this file again. Integrate into Pack writes it again too, the model and its textures included, except the shared lists, which it merges with yours (item_texture.json, sounds.json, the language file), and the manifests and pack icons, which it leaves as they are apart from adding its stamp.",
-        "display_sensei.link.dates_unavailable": "No file dates: Blockbench was not allowed to read the packs' folder.",
-        "display_sensei.link.dates_rp_only": "No dates for behavior pack files: only the resource pack's folder may be read.",
         "display_sensei.link.refresh": "Refresh",
         "display_sensei.link.refresh_hint": "Read the pack files again, for example after you changed them outside Blockbench.",
-        "display_sensei.link.dates": "Show file dates",
-        "display_sensei.link.dates_hint": "Show when each file was last written. Blockbench asks whether Display Sensei may read the packs' folder; it only reads the dates and never changes a file.",
         "display_sensei.link.open_rp": "Open resource pack",
         "display_sensei.link.open_rp_hint": "Show the resource pack's folder in your file browser.",
         "display_sensei.link.open_bp": "Open behavior pack",
@@ -2403,7 +2397,7 @@ function addFileRow(scan, pack, path, role, exists, id = null, maybeGame = false
     if (scan.rowKeys.has(key)) return;
     scan.rowKeys.add(key);
     scan.files.push({
-        pack, path, role, kind: ROLE_KINDS[role] || 'code', rewritten: false, exists, maybe_game: maybeGame, mtime: null, id
+        pack, path, role, kind: ROLE_KINDS[role] || 'code', rewritten: false, exists, maybe_game: maybeGame, id
     });
 }
 
@@ -2618,7 +2612,7 @@ function getLinkKey(project) {
 }
 
 function createEmptyView(status) {
-    return { status, rp: null, bp: null, stamps: [], kind: null, wizard: null, files: [], notes: [], dates: 'none', bp_dates: false };
+    return { status, rp: null, bp: null, stamps: [], kind: null, wizard: null, files: [], notes: [] };
 }
 
 function findModelKind(scan) {
@@ -2645,7 +2639,7 @@ function readWearInfo(scan) {
 }
 
 function buildLinkEntry(project) {
-    let unlinked = status => ({ view: createEmptyView(status), entityKind: null, wear: null, attachable: null, animationFiles: {}, dateRoots: null, datesScope: null });
+    let unlinked = status => ({ view: createEmptyView(status), entityKind: null, wear: null, attachable: null, animationFiles: {} });
     if (!isDesktopApp()) return unlinked('desktop_only');
     let startPath = getStartPath(project);
     if (!startPath) return unlinked('no_path');
@@ -2685,8 +2679,6 @@ function buildLinkEntry(project) {
     addPackFiles(scan);
     if (scan.wizard) markRewrittenFiles(scan.files, scan.wizard, scan.stem);
 
-    let datesScope = getFileDatesScope(rp.path, bp.path);
-    let datesCoverBp = !!bp.path && !!datesScope && (isSameFolder(datesScope, bp.path) || isInsideFolder(datesScope, bp.path));
     let view = {
         status: 'linked',
         rp: { name: PathModule.basename(rp.path), path: rp.path },
@@ -2695,18 +2687,14 @@ function buildLinkEntry(project) {
         kind: scan.kind,
         wizard: scan.wizard,
         files: scan.files,
-        notes: buildNotes(scan),
-        dates: 'none',
-        bp_dates: datesCoverBp
+        notes: buildNotes(scan)
     };
     return {
         view,
         entityKind: scan.entityFile ? scan.entityFile.kind : null,
         wear: readWearInfo(scan),
         attachable: scan.kind === 'attachable' && scan.entityFile ? { path: scan.entityFile.path, description: scan.entityFile.description } : null,
-        animationFiles: scan.animationFiles,
-        dateRoots: { rp: rp.path, bp: datesCoverBp ? bp.path : null },
-        datesScope
+        animationFiles: scan.animationFiles
     };
 }
 
@@ -2717,11 +2705,10 @@ function scanPackLink(project = Project) {
         entry = buildLinkEntry(project);
     } catch (error) {
         console.warn(LOG_PREFIX, 'Could not read the pack of this project:', error);
-        entry = { view: createEmptyView('error'), entityKind: null, wear: null, attachable: null, animationFiles: {}, dateRoots: null, datesScope: null };
+        entry = { view: createEmptyView('error'), entityKind: null, wear: null, attachable: null, animationFiles: {} };
     }
     entry.key = getLinkKey(project);
     linkCache.set(project, entry);
-    fillFileDates(entry, false);
     for (let listener of packScanListeners.slice()) listener(project);
     return cloneJson(entry.view);
 }
@@ -2801,89 +2788,6 @@ function readPackTextFile(path) {
 }
 
 // =========================
-// File dates
-// =========================
-let scopedFsCache = new Map();
-
-function canAskForFileDates() {
-    return isDesktopApp() && typeof requireNativeModule === 'function';
-}
-
-function getFileDatesScope(rpRoot, bpRoot) {
-    let rp = PathModule.resolve(rpRoot);
-    let packsFolder = PathModule.dirname(rp);
-    let gameFolder = PathModule.dirname(packsFolder);
-    let inGameFolders = /resource_packs$/i.test(PathModule.basename(packsFolder));
-    if (inGameFolders && bpRoot) {
-        let bpPacksFolder = PathModule.dirname(PathModule.resolve(bpRoot));
-        inGameFolders = /behavior_packs$/i.test(PathModule.basename(bpPacksFolder)) &&
-            isSameFolder(PathModule.dirname(bpPacksFolder), gameFolder);
-    }
-    if (inGameFolders && !isTooWideForDates(gameFolder)) return gameFolder;
-    return isTooWideForDates(rp) ? null : rp;
-}
-
-function isSameFolder(first, second) {
-    return PathModule.relative(first, second) === '';
-}
-
-function isTooWideForDates(folder) {
-    if (PathModule.dirname(folder) === folder) return true;
-    let home = typeof SystemInfo !== 'undefined' && SystemInfo ? SystemInfo.home_directory : null;
-    return !!home && (isSameFolder(folder, home) || isInsideFolder(folder, home));
-}
-
-function getScopedFs(scope, ask) {
-    if (!scope || !canAskForFileDates()) return null;
-    if (scopedFsCache.has(scope)) return scopedFsCache.get(scope);
-    let scopedFs = null;
-    try {
-        scopedFs = requireNativeModule('fs', {
-            scope,
-            show_permission_dialog: ask,
-            message: i18n('display_sensei.message.file_dates_permission')
-        }) || null;
-    } catch (error) {
-        console.warn(LOG_PREFIX, 'Could not get the file dates:', error);
-    }
-    if (scopedFs) scopedFsCache.set(scope, scopedFs);
-    return scopedFs;
-}
-
-function readFileDates(rows, rootPaths, scopedFs) {
-    for (let row of rows) {
-        let root = rootPaths ? rootPaths[row.pack] : null;
-        row.mtime = null;
-        if (row.exists !== true || !root) continue;
-        try {
-            let mtime = scopedFs.statSync(joinPackPath(root, row.path)).mtimeMs;
-            row.mtime = typeof mtime === 'number' && Number.isFinite(mtime) ? mtime : null;
-        } catch (error) {
-            row.mtime = null;
-        }
-    }
-    return rows;
-}
-
-function fillFileDates(entry, ask) {
-    if (!entry || !entry.view || entry.view.status !== 'linked') return;
-    let scopedFs = getScopedFs(entry.datesScope, ask);
-    if (scopedFs) {
-        readFileDates(entry.view.files, entry.dateRoots, scopedFs);
-        entry.view.dates = 'shown';
-    } else if (ask) {
-        entry.view.dates = 'unavailable';
-    }
-}
-
-function refreshFileDates(project = Project, ask = false) {
-    let entry = project ? linkCache.get(project) : null;
-    fillFileDates(entry, ask);
-    refreshPanelSafely();
-    return !!entry && !!entry.view && entry.view.dates === 'shown';
-}
-
-// =========================
 // Opening a pack folder
 // =========================
 function openPackFolder(which = 'rp', project = Project) {
@@ -2907,7 +2811,6 @@ function installPackLink() {
             packScanListeners = [];
             linkCache = new WeakMap();
             forgetRememberedSearches();
-            scopedFsCache = new Map();
             bypassSaveGuard = false;
             overwriteDepth = 0;
             dismissedSaveWarnings = new WeakSet();
@@ -14503,10 +14406,6 @@ const HAND_CARD_NOTE_IDS = ['wearable_armor', 'mount_slot'];
 
 const ARMOR_CARD_NOTE_IDS = ['wearable_offhand', 'mount_slot'];
 
-function formatFileDate(mtime) {
-    return new Date(mtime).toLocaleString();
-}
-
 // =========================
 // Block route editor: controls
 // =========================
@@ -16054,12 +15953,9 @@ const PANEL_TEMPLATE = `
                             </div>
                         </div>
                     </div>
-                    <p v-if="link.dates === 'unavailable'" class="ds-hint" data-ds-link="dates">{{ t('display_sensei.link.dates_unavailable') }}</p>
-                    <p v-if="link.dates === 'shown' && link.bp.status === 'found' && !link.bp_dates" class="ds-hint" data-ds-link="dates_rp_only">{{ t('display_sensei.link.dates_rp_only') }}</p>
                 </template>
                 <div v-if="showLinkActions()" class="ds-link-actions">
                     <button type="button" data-ds-action="link_refresh" :title="t('display_sensei.link.refresh_hint')" @click="refreshLink">{{ t('display_sensei.link.refresh') }}</button>
-                    <button v-if="canShowFileDates()" type="button" data-ds-action="link_dates" :title="t('display_sensei.link.dates_hint')" @click="showFileDates">{{ t('display_sensei.link.dates') }}</button>
                     <button v-if="link && link.status === 'linked'" type="button" data-ds-action="link_open_folder" :title="t('display_sensei.link.open_rp_hint')" @click="openLinkedFolder('rp')">{{ t('display_sensei.link.open_rp') }}</button>
                     <button v-if="link && link.status === 'linked' && link.bp.status === 'found'" type="button" data-ds-action="link_open_bp_folder" :title="t('display_sensei.link.open_bp_hint')" @click="openLinkedFolder('bp')">{{ t('display_sensei.link.open_bp') }}</button>
                 </div>
@@ -16754,16 +16650,11 @@ function buildPanelComponent() {
                 } else if (row.exists !== true) {
                     let ambiguous = this.link.bp && this.link.bp.status === 'ambiguous';
                     parts.push(this.t(ambiguous ? 'display_sensei.link.bp_ambiguous_detail' : 'display_sensei.link.bp_unknown_detail'));
-                } else if (typeof row.mtime === 'number') {
-                    parts.push(this.tf('display_sensei.link.date', { date: formatFileDate(row.mtime) }));
                 }
                 return parts.join(' · ');
             },
             showLinkActions() {
                 return !this.link || this.link.status !== 'desktop_only';
-            },
-            canShowFileDates() {
-                return !!this.link && this.link.status === 'linked' && this.link.dates !== 'shown' && canAskForFileDates();
             },
 
             getInfoCardText() {
@@ -17948,9 +17839,6 @@ function buildPanelComponent() {
             refreshLink() {
                 forgetHoldFiles();
                 refreshPackLink(Project);
-            },
-            showFileDates() {
-                refreshFileDates(Project, true);
             },
             openLinkedFolder(which) {
                 openPackFolder(which);

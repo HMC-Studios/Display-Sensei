@@ -194,10 +194,6 @@ const HAND_CARD_NOTE_IDS = ['wearable_armor', 'mount_slot'];
 
 const ARMOR_CARD_NOTE_IDS = ['wearable_offhand', 'mount_slot'];
 
-function formatFileDate(mtime) {
-    return new Date(mtime).toLocaleString();
-}
-
 // =========================
 // Block route editor: controls
 // =========================
@@ -1745,12 +1741,9 @@ const PANEL_TEMPLATE = `
                             </div>
                         </div>
                     </div>
-                    <p v-if="link.dates === 'unavailable'" class="ds-hint" data-ds-link="dates">{{ t('display_sensei.link.dates_unavailable') }}</p>
-                    <p v-if="link.dates === 'shown' && link.bp.status === 'found' && !link.bp_dates" class="ds-hint" data-ds-link="dates_rp_only">{{ t('display_sensei.link.dates_rp_only') }}</p>
                 </template>
                 <div v-if="showLinkActions()" class="ds-link-actions">
                     <button type="button" data-ds-action="link_refresh" :title="t('display_sensei.link.refresh_hint')" @click="refreshLink">{{ t('display_sensei.link.refresh') }}</button>
-                    <button v-if="canShowFileDates()" type="button" data-ds-action="link_dates" :title="t('display_sensei.link.dates_hint')" @click="showFileDates">{{ t('display_sensei.link.dates') }}</button>
                     <button v-if="link && link.status === 'linked'" type="button" data-ds-action="link_open_folder" :title="t('display_sensei.link.open_rp_hint')" @click="openLinkedFolder('rp')">{{ t('display_sensei.link.open_rp') }}</button>
                     <button v-if="link && link.status === 'linked' && link.bp.status === 'found'" type="button" data-ds-action="link_open_bp_folder" :title="t('display_sensei.link.open_bp_hint')" @click="openLinkedFolder('bp')">{{ t('display_sensei.link.open_bp') }}</button>
                 </div>
@@ -2445,16 +2438,11 @@ function buildPanelComponent() {
                 } else if (row.exists !== true) {
                     let ambiguous = this.link.bp && this.link.bp.status === 'ambiguous';
                     parts.push(this.t(ambiguous ? 'display_sensei.link.bp_ambiguous_detail' : 'display_sensei.link.bp_unknown_detail'));
-                } else if (typeof row.mtime === 'number') {
-                    parts.push(this.tf('display_sensei.link.date', { date: formatFileDate(row.mtime) }));
                 }
                 return parts.join(' · ');
             },
             showLinkActions() {
                 return !this.link || this.link.status !== 'desktop_only';
-            },
-            canShowFileDates() {
-                return !!this.link && this.link.status === 'linked' && this.link.dates !== 'shown' && canAskForFileDates();
             },
 
             getInfoCardText() {
@@ -3639,9 +3627,6 @@ function buildPanelComponent() {
             refreshLink() {
                 forgetHoldFiles();
                 refreshPackLink(Project);
-            },
-            showFileDates() {
-                refreshFileDates(Project, true);
             },
             openLinkedFolder(which) {
                 openPackFolder(which);

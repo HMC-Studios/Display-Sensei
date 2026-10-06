@@ -779,7 +779,7 @@ function addFileRow(scan, pack, path, role, exists, id = null, maybeGame = false
     if (scan.rowKeys.has(key)) return;
     scan.rowKeys.add(key);
     scan.files.push({
-        pack, path, role, kind: ROLE_KINDS[role] || 'code', rewritten: false, exists, maybe_game: maybeGame, mtime: null, id
+        pack, path, role, kind: ROLE_KINDS[role] || 'code', rewritten: false, exists, maybe_game: maybeGame, id
     });
 }
 
@@ -994,7 +994,7 @@ function getLinkKey(project) {
 }
 
 function createEmptyView(status) {
-    return { status, rp: null, bp: null, stamps: [], kind: null, wizard: null, files: [], notes: [], dates: 'none', bp_dates: false };
+    return { status, rp: null, bp: null, stamps: [], kind: null, wizard: null, files: [], notes: [] };
 }
 
 function findModelKind(scan) {
@@ -1021,7 +1021,7 @@ function readWearInfo(scan) {
 }
 
 function buildLinkEntry(project) {
-    let unlinked = status => ({ view: createEmptyView(status), entityKind: null, wear: null, attachable: null, animationFiles: {}, dateRoots: null, datesScope: null });
+    let unlinked = status => ({ view: createEmptyView(status), entityKind: null, wear: null, attachable: null, animationFiles: {} });
     if (!isDesktopApp()) return unlinked('desktop_only');
     let startPath = getStartPath(project);
     if (!startPath) return unlinked('no_path');
@@ -1061,8 +1061,6 @@ function buildLinkEntry(project) {
     addPackFiles(scan);
     if (scan.wizard) markRewrittenFiles(scan.files, scan.wizard, scan.stem);
 
-    let datesScope = getFileDatesScope(rp.path, bp.path);
-    let datesCoverBp = !!bp.path && !!datesScope && (isSameFolder(datesScope, bp.path) || isInsideFolder(datesScope, bp.path));
     let view = {
         status: 'linked',
         rp: { name: PathModule.basename(rp.path), path: rp.path },
@@ -1071,18 +1069,14 @@ function buildLinkEntry(project) {
         kind: scan.kind,
         wizard: scan.wizard,
         files: scan.files,
-        notes: buildNotes(scan),
-        dates: 'none',
-        bp_dates: datesCoverBp
+        notes: buildNotes(scan)
     };
     return {
         view,
         entityKind: scan.entityFile ? scan.entityFile.kind : null,
         wear: readWearInfo(scan),
         attachable: scan.kind === 'attachable' && scan.entityFile ? { path: scan.entityFile.path, description: scan.entityFile.description } : null,
-        animationFiles: scan.animationFiles,
-        dateRoots: { rp: rp.path, bp: datesCoverBp ? bp.path : null },
-        datesScope
+        animationFiles: scan.animationFiles
     };
 }
 
@@ -1093,11 +1087,10 @@ function scanPackLink(project = Project) {
         entry = buildLinkEntry(project);
     } catch (error) {
         console.warn(LOG_PREFIX, 'Could not read the pack of this project:', error);
-        entry = { view: createEmptyView('error'), entityKind: null, wear: null, attachable: null, animationFiles: {}, dateRoots: null, datesScope: null };
+        entry = { view: createEmptyView('error'), entityKind: null, wear: null, attachable: null, animationFiles: {} };
     }
     entry.key = getLinkKey(project);
     linkCache.set(project, entry);
-    fillFileDates(entry, false);
     for (let listener of packScanListeners.slice()) listener(project);
     return cloneJson(entry.view);
 }
@@ -1177,89 +1170,6 @@ function readPackTextFile(path) {
 }
 
 // =========================
-// File dates
-// =========================
-let scopedFsCache = new Map();
-
-function canAskForFileDates() {
-    return isDesktopApp() && typeof requireNativeModule === 'function';
-}
-
-function getFileDatesScope(rpRoot, bpRoot) {
-    let rp = PathModule.resolve(rpRoot);
-    let packsFolder = PathModule.dirname(rp);
-    let gameFolder = PathModule.dirname(packsFolder);
-    let inGameFolders = /resource_packs$/i.test(PathModule.basename(packsFolder));
-    if (inGameFolders && bpRoot) {
-        let bpPacksFolder = PathModule.dirname(PathModule.resolve(bpRoot));
-        inGameFolders = /behavior_packs$/i.test(PathModule.basename(bpPacksFolder)) &&
-            isSameFolder(PathModule.dirname(bpPacksFolder), gameFolder);
-    }
-    if (inGameFolders && !isTooWideForDates(gameFolder)) return gameFolder;
-    return isTooWideForDates(rp) ? null : rp;
-}
-
-function isSameFolder(first, second) {
-    return PathModule.relative(first, second) === '';
-}
-
-function isTooWideForDates(folder) {
-    if (PathModule.dirname(folder) === folder) return true;
-    let home = typeof SystemInfo !== 'undefined' && SystemInfo ? SystemInfo.home_directory : null;
-    return !!home && (isSameFolder(folder, home) || isInsideFolder(folder, home));
-}
-
-function getScopedFs(scope, ask) {
-    if (!scope || !canAskForFileDates()) return null;
-    if (scopedFsCache.has(scope)) return scopedFsCache.get(scope);
-    let scopedFs = null;
-    try {
-        scopedFs = requireNativeModule('fs', {
-            scope,
-            show_permission_dialog: ask,
-            message: i18n('display_sensei.message.file_dates_permission')
-        }) || null;
-    } catch (error) {
-        console.warn(LOG_PREFIX, 'Could not get the file dates:', error);
-    }
-    if (scopedFs) scopedFsCache.set(scope, scopedFs);
-    return scopedFs;
-}
-
-function readFileDates(rows, rootPaths, scopedFs) {
-    for (let row of rows) {
-        let root = rootPaths ? rootPaths[row.pack] : null;
-        row.mtime = null;
-        if (row.exists !== true || !root) continue;
-        try {
-            let mtime = scopedFs.statSync(joinPackPath(root, row.path)).mtimeMs;
-            row.mtime = typeof mtime === 'number' && Number.isFinite(mtime) ? mtime : null;
-        } catch (error) {
-            row.mtime = null;
-        }
-    }
-    return rows;
-}
-
-function fillFileDates(entry, ask) {
-    if (!entry || !entry.view || entry.view.status !== 'linked') return;
-    let scopedFs = getScopedFs(entry.datesScope, ask);
-    if (scopedFs) {
-        readFileDates(entry.view.files, entry.dateRoots, scopedFs);
-        entry.view.dates = 'shown';
-    } else if (ask) {
-        entry.view.dates = 'unavailable';
-    }
-}
-
-function refreshFileDates(project = Project, ask = false) {
-    let entry = project ? linkCache.get(project) : null;
-    fillFileDates(entry, ask);
-    refreshPanelSafely();
-    return !!entry && !!entry.view && entry.view.dates === 'shown';
-}
-
-// =========================
 // Opening a pack folder
 // =========================
 function openPackFolder(which = 'rp', project = Project) {
@@ -1283,7 +1193,6 @@ function installPackLink() {
             packScanListeners = [];
             linkCache = new WeakMap();
             forgetRememberedSearches();
-            scopedFsCache = new Map();
             bypassSaveGuard = false;
             overwriteDepth = 0;
             dismissedSaveWarnings = new WeakSet();

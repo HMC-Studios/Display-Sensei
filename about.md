@@ -1,5 +1,7 @@
 Set how Minecraft Bedrock models display: held in first and third person, in item frames, on the ground, on shelves, in flower pots, in the inventory and on the head. Check armor on players and mobs.
 
+For Bedrock, Blockbench's own Display Mode only covers block models. Display Sensei adds Bedrock reference models and poses, matching first person to third person, the hand holds of 3D items (attachables), and armor on players and mobs.
+
 ## Usage
 
 Open a Bedrock Block or Bedrock Entity project, then choose **Tools > Display Sensei**.

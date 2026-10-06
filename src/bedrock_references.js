@@ -3,7 +3,7 @@
 // =========================
 
 // =========================
-// The rules (BEDROCK_DISPLAY_SPEC.md §0.3)
+// Bedrock values in Blockbench's space
 // =========================
 const DEGREES = Math.PI / 180;
 
@@ -208,7 +208,7 @@ function addVectors(a, b) {
 }
 
 // =========================
-// Composer (R1, R4, R6 with THREE)
+// Composer (matrices with THREE)
 // =========================
 function translationMatrix(vector) {
     return new THREE.Matrix4().makeTranslation(vector[0], vector[1], vector[2]);
@@ -638,7 +638,7 @@ function isFrameBoardTexture(texture) {
 }
 
 // =========================
-// Bedrock references (BEDROCK_DISPLAY_SPEC.md §1.1)
+// Bedrock references
 // =========================
 const BEDROCK_REFERENCE_DEFINITIONS = [
     {
@@ -768,7 +768,7 @@ const BEDROCK_REFERENCE_DEFINITIONS = [
     }
 ];
 
-const BEDROCK_REFERENCE_FOR_JAVA = {
+const BEDROCK_REFERENCE_FOR_BLOCKBENCH = {
     player: 'bedrock_player',
     zombie: 'bedrock_zombie',
     baby_zombie: 'bedrock_baby_zombie',
@@ -987,7 +987,7 @@ function poseZombieMeshes(reference) {
 }
 
 // =========================
-// After a load (BEDROCK_DISPLAY_SPEC.md §9.2 F)
+// After a load
 // =========================
 let isDrawingBar = false;
 
@@ -1104,7 +1104,7 @@ function syncBlockbenchPoseSlider(reference) {
 }
 
 // =========================
-// Pose angle (12_native_display_panel.js)
+// Pose angle (used by native_display_panel.js)
 // =========================
 function getPoseSpec(reference, slotId) {
     let definition = getReferenceDefinition(reference);
@@ -1163,7 +1163,7 @@ function describeReference(reference, slotId) {
 }
 
 // =========================
-// A hand slot's reference without loading it (14_hand_views.js)
+// A hand slot's reference without loading it (used by hand_views.js)
 // =========================
 const HAND_SLOT_REFERENCE_KINDS = {
     thirdperson_righthand: HOLDER_KINDS,
@@ -1175,7 +1175,7 @@ const HAND_SLOT_REFERENCE_KINDS = {
 function getSlotReferenceIds(slotId) {
     let kinds = HAND_SLOT_REFERENCE_KINDS[slotId] || [];
     let drawn = referenceIdsBySlot[slotId];
-    let ids = drawn ? drawn.map(id => BEDROCK_REFERENCE_FOR_JAVA[id] || id) :
+    let ids = drawn ? drawn.map(id => BEDROCK_REFERENCE_FOR_BLOCKBENCH[id] || id) :
         BEDROCK_REFERENCE_DEFINITIONS.filter(definition => kinds.includes(definition.kind)).map(definition => definition.id);
     let refmodels = displayReferenceObjects.refmodels;
     return ids.filter(id => refmodels[id] && Condition(refmodels[id]));
@@ -1211,43 +1211,43 @@ function placeReferenceForSlot(reference) {
 }
 
 // =========================
-// Remembered reference per slot (§9.2 D)
+// Remembered reference per slot
 // =========================
 function splitRememberedReferences() {
-    let javaIndexes = displayReferenceObjects.ref_indexes;
+    let blockbenchIndexes = displayReferenceObjects.ref_indexes;
     let bedrockIndexes = {};
-    for (let slotId of displayReferenceObjects.slots || Object.keys(javaIndexes)) bedrockIndexes[slotId] = 0;
+    for (let slotId of displayReferenceObjects.slots || Object.keys(blockbenchIndexes)) bedrockIndexes[slotId] = 0;
     Object.defineProperty(displayReferenceObjects, 'ref_indexes', {
         configurable: true,
         enumerable: true,
         get() {
-            return getRoute() === 'block' ? bedrockIndexes : javaIndexes;
+            return getRoute() === 'block' ? bedrockIndexes : blockbenchIndexes;
         },
         set(value) {
             if (getRoute() === 'block') bedrockIndexes = value;
-            else javaIndexes = value;
+            else blockbenchIndexes = value;
         }
     });
     return {
         delete() {
             delete displayReferenceObjects.ref_indexes;
-            displayReferenceObjects.ref_indexes = javaIndexes;
+            displayReferenceObjects.ref_indexes = blockbenchIndexes;
         }
     };
 }
 
 // =========================
-// The reference bar (§9.2 E)
+// The reference bar
 // =========================
-let javaIdsBySlot = {};
-let unmappedJavaIds = new Set();
+let blockbenchIdsBySlot = {};
+let unmappedBlockbenchIds = new Set();
 
-function toBedrockReferenceIds(slotId, javaIds) {
-    let ids = javaIds.map(id => {
-        if (BEDROCK_REFERENCE_FOR_JAVA[id]) return BEDROCK_REFERENCE_FOR_JAVA[id];
-        if (!unmappedJavaIds.has(id)) {
-            unmappedJavaIds.add(id);
-            console.warn(LOG_PREFIX, `Blockbench offers the reference model "${id}", which has no Bedrock version yet; it is shown as it is.`);
+function toBedrockReferenceIds(slotId, blockbenchIds) {
+    let ids = blockbenchIds.map(id => {
+        if (BEDROCK_REFERENCE_FOR_BLOCKBENCH[id]) return BEDROCK_REFERENCE_FOR_BLOCKBENCH[id];
+        if (!unmappedBlockbenchIds.has(id)) {
+            unmappedBlockbenchIds.add(id);
+            console.warn(LOG_PREFIX, `Blockbench offers the reference model "${id}", which has no Bedrock version; it is shown as it is.`);
         }
         return id;
     });
@@ -1256,49 +1256,49 @@ function toBedrockReferenceIds(slotId, javaIds) {
 
 function wrapBedrockReferenceBar() {
     return wrapMethod(displayReferenceObjects, 'bar', function(original, args) {
-        let javaIds = args[0];
-        if (!Array.isArray(javaIds)) return original.apply(this, args);
+        let blockbenchIds = args[0];
+        if (!Array.isArray(blockbenchIds)) return original.apply(this, args);
         let slotId = DisplayMode.display_slot;
-        javaIdsBySlot[slotId] = javaIds.slice();
+        blockbenchIdsBySlot[slotId] = blockbenchIds.slice();
         if (getRoute() !== 'block') return original.apply(this, args);
         if (slotId === 'ground') resetGroundClock();
         savedSlotCamera = null;
         isDrawingBar = true;
         try {
-            return original.apply(this, [toBedrockReferenceIds(slotId, javaIds)].concat(args.slice(1)));
+            return original.apply(this, [toBedrockReferenceIds(slotId, blockbenchIds)].concat(args.slice(1)));
         } finally {
             isDrawingBar = false;
         }
     });
 }
 
-function getJavaIdsForSlot(slotId) {
-    if (javaIdsBySlot[slotId]) return javaIdsBySlot[slotId].slice();
+function getBlockbenchIdsForSlot(slotId) {
+    if (blockbenchIdsBySlot[slotId]) return blockbenchIdsBySlot[slotId].slice();
     let shown = referenceIdsBySlot[slotId] || [];
-    let javaFor = {};
-    for (let [javaId, bedrockId] of Object.entries(BEDROCK_REFERENCE_FOR_JAVA)) javaFor[bedrockId] = javaId;
-    return shown.filter(id => javaFor[id] || !getBedrockReference(id)).map(id => javaFor[id] || id);
+    let blockbenchFor = {};
+    for (let [blockbenchId, bedrockId] of Object.entries(BEDROCK_REFERENCE_FOR_BLOCKBENCH)) blockbenchFor[bedrockId] = blockbenchId;
+    return shown.filter(id => blockbenchFor[id] || !getBedrockReference(id)).map(id => blockbenchFor[id] || id);
 }
 
 function showBedrockReferencesNow() {
     if (!Modes.display || getRoute() !== 'block' || !DisplayMode.display_slot) return;
-    let ids = getJavaIdsForSlot(DisplayMode.display_slot);
+    let ids = getBlockbenchIdsForSlot(DisplayMode.display_slot);
     if (!ids.length) return;
     displayReferenceObjects.bar(ids);
     markBlockbenchReferenceButton(displayReferenceObjects.active ? displayReferenceObjects.active.id : null);
     DisplayMode.updateDisplayBase();
 }
 
-function showBlockbenchReferencesAgain(slotId, javaIds) {
-    if (!Modes.display || getRoute() !== 'block' || DisplayMode.display_slot !== slotId || !javaIds.length) return;
+function showBlockbenchReferencesAgain(slotId, blockbenchIds) {
+    if (!Modes.display || getRoute() !== 'block' || DisplayMode.display_slot !== slotId || !blockbenchIds.length) return;
     if (slotId === 'gui') DisplayMode.setBase(0, 0, 0, 0, 0, 0, GUI_AREA_SCALE, GUI_AREA_SCALE, GUI_AREA_SCALE);
-    displayReferenceObjects.bar(javaIds);
+    displayReferenceObjects.bar(blockbenchIds);
     markBlockbenchReferenceButton(displayReferenceObjects.active ? displayReferenceObjects.active.id : null);
     DisplayMode.updateDisplayBase();
 }
 
 // =========================
-// Ground (§4.2)
+// Ground
 // =========================
 let groundClock = { seconds: 0, last: null };
 
@@ -1347,7 +1347,7 @@ function followGroundRestHeight() {
 }
 
 // =========================
-// Shelf copies (§4.3)
+// Shelf copies
 // =========================
 function updateShelfCopies(reference) {
     let area = DisplayMode.display_area;
@@ -1375,7 +1375,7 @@ function updateShelfCopies(reference) {
 }
 
 // =========================
-// GUI: Fit to Frame preview (§5.4)
+// GUI: Fit to Frame preview
 // =========================
 function isGuiFitPreviewOn() {
     return previewOptions.fitPreview && !!Project && getProjectData().gui_fit_to_frame;
@@ -1443,7 +1443,7 @@ function mirrorPivotsForLeftHand(slot) {
 }
 
 // =========================
-// GUI: face dimming (§5.3)
+// GUI: face dimming
 // =========================
 let isFaceDimmingRemoved = false;
 
@@ -1494,7 +1494,7 @@ function followFaceDimming() {
 }
 
 // =========================
-// GUI overlays (§5.2)
+// GUI overlays
 // =========================
 const GUI_OVERLAYS = [
     { referenceId: 'bedrock_gui_grid', nameKey: 'display_sensei.reference.bedrock_gui_grid', size: [3 * GUI_SLOT_SIZE, 3 * GUI_SLOT_SIZE], modelAt: [1.5 * GUI_SLOT_SIZE, 1.5 * GUI_SLOT_SIZE], draw: drawGridOverlay },
@@ -1640,7 +1640,7 @@ function syncGuiOverlayRegistration() {
 }
 
 // =========================
-// Glow item frame texture (§4.1)
+// Glow item frame texture
 // =========================
 let glowFrameTexture = null;
 
@@ -1695,7 +1695,7 @@ function applyGlowTextureTo(reference) {
 }
 
 // =========================
-// Skin variant (§8.4)
+// Skin variant
 // =========================
 function followPlayerVariant() {
     let player = displayReferenceObjects.refmodels.player;
@@ -1872,7 +1872,7 @@ function followSkinMenuEntry() {
 }
 
 // =========================
-// Statue preset (03_bedrock_spec.js, 10_block_route.js)
+// Statue preset (used by bedrock_spec.js and block_route.js)
 // =========================
 const STATUE_CENTRE = [0, 8, 0];
 
@@ -1928,14 +1928,14 @@ function installBedrockReferences() {
     return {
         delete() {
             let slotId = Modes.display ? DisplayMode.display_slot : null;
-            let javaIds = slotId ? getJavaIdsForSlot(slotId) : [];
+            let blockbenchIds = slotId ? getBlockbenchIdsForSlot(slotId) : [];
             if (getReferenceDefinition(displayReferenceObjects.active)) displayReferenceObjects.clear();
             hooks.delete();
-            javaIdsBySlot = {};
-            unmappedJavaIds = new Set();
+            blockbenchIdsBySlot = {};
+            unmappedBlockbenchIds = new Set();
             savedSlotCamera = null;
             resetGroundClock();
-            if (slotId) showBlockbenchReferencesAgain(slotId, javaIds);
+            if (slotId) showBlockbenchReferencesAgain(slotId, blockbenchIds);
         }
     };
 }

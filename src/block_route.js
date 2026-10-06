@@ -127,7 +127,7 @@ function seedEngineDefaults(slot) {
 }
 
 // =========================
-// Mirrors from Java become 180° turns
+// Mirrored values become 180° turns (Bedrock has no negative scale)
 // =========================
 const THIN_AXIS_ORDER = [2, 1, 0];
 
@@ -1115,7 +1115,7 @@ function applyBlockbenchPreset(original, args) {
         if (!bedrockId) {
             if (!unmappedBlockbenchPresets.has(preset.id)) {
                 unmappedBlockbenchPresets.add(preset.id);
-                console.warn(LOG_PREFIX, `Blockbench's preset "${preset.id}" has no Bedrock version yet; it is applied as it is.`);
+                console.warn(LOG_PREFIX, `Blockbench's preset "${preset.id}" has no Bedrock version; it is applied as it is.`);
             }
             return original.apply(this, args);
         }

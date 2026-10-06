@@ -113,7 +113,7 @@ function applyThirdPersonCamera(view, handId) {
 }
 
 // =========================
-// Cameras of the other hand views (14_hand_views.js)
+// Cameras of the other hand views (used by hand_views.js)
 // =========================
 const FIRST_PERSON_CAMERA = { position: [0, 24, 32.4], target: [0, 24, 0] };
 

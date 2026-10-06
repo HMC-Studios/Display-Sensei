@@ -7,7 +7,7 @@ const PLUGIN_META = {
     title: 'Display Sensei',
     author: 'NET',
     icon: 'icon.png',
-    description: 'Edit and preview how Bedrock blocks and attachable items display when held in first and third person, in item frames, on the ground, in the GUI, on the head, in flower pots and on shelves.',
+    description: 'Edit and preview how Bedrock blocks display (held, in item frames, on the ground, in the GUI, on the head, in flower pots and on shelves), how 3D items sit in the hand, and how armor fits on players and mobs.',
     tags: ['Minecraft: Bedrock Edition', 'Utility'],
     version: '1.0.0',
     min_version: '5.2.0',

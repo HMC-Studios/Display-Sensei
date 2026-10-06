@@ -10,11 +10,37 @@ function getPanelMode() {
     return 'docked';
 }
 
-const FILL_SIDEBAR_MODE_ID = 'display';
-
 function dockPanel(panel) {
-    panel.fixed_height = Interface.getUIMode() !== FILL_SIDEBAR_MODE_ID;
+    panel.fixed_height = false;
     panel.moveTo('right_bar');
+}
+
+// =========================
+// Filling the space it is in
+// =========================
+let grownHostId = null;
+
+function setHostGrowing(host, growing) {
+    if (host && host.container) host.container.style.flexGrow = growing ? '1' : '';
+}
+
+function fillPanelSpace() {
+    let panel = getPanel();
+    let host = panel ? panel.getHostPanel() : null;
+    let wanted = host && host !== panel && !host.growable && host.isInSidebar() ? host : null;
+    if (grownHostId && (!wanted || wanted.id !== grownHostId)) {
+        setHostGrowing(Panels[grownHostId], false);
+        grownHostId = null;
+    }
+    if (wanted) {
+        setHostGrowing(wanted, true);
+        grownHostId = wanted.id;
+    }
+}
+
+function releaseFilledSpace() {
+    if (grownHostId) setHostGrowing(Panels[grownHostId], false);
+    grownHostId = null;
 }
 
 function setPanelFloating(shouldFloat) {

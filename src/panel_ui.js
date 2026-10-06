@@ -3666,19 +3666,18 @@ function createPanel() {
             float_position: [100, 60],
             float_size: [400, 880],
             height: 480,
-            fixed_height: true,
+            fixed_height: false,
             sidebar_index: 20
-        },
-        mode_positions: {
-            [FILL_SIDEBAR_MODE_ID]: { fixed_height: false }
         },
         resizable: true,
         growable: true,
         min_height: 280,
+        onResize: fillPanelSpace,
         component: buildPanelComponent()
     });
     panelVue = panelInstance.vue;
     panelInstance.on('update', () => {
+        fillPanelSpace();
         if (!panelVue) return;
         panelVue.syncPanelMode();
         panelVue.onPanelShown();
@@ -3694,6 +3693,7 @@ function destroyPanel() {
     if (!panel) return;
     panelInstance = null;
     panelVue = null;
+    releaseFilledSpace();
     releaseAttachedPanels(panel);
     removeFromFloatingOrder(panel);
     if (vue) vue.$destroy();

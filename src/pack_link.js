@@ -121,10 +121,6 @@ function getWizardEntityCompileSource(event) {
     return null;
 }
 
-function isWizardEntityCompile(event) {
-    return getWizardEntityCompileSource(event) !== null;
-}
-
 function isBlockWizardCompile(event) {
     return isPluginRawCompile(event) && (isWizardDialogOpen('block') || isProjectTrackedByWizard('block', Project));
 }
@@ -1168,11 +1164,6 @@ function getLinkedAttachable(project = Project) {
 function getLinkedAnimationFiles(project = Project) {
     let entry = project ? linkCache.get(project) : null;
     return entry && entry.animationFiles ? Object.assign({}, entry.animationFiles) : {};
-}
-
-function hasPackLinkScan(project = Project) {
-    let entry = project ? linkCache.get(project) : null;
-    return !!entry && entry.key === getLinkKey(project);
 }
 
 // =========================

@@ -499,10 +499,6 @@ function getHeldWearerChoices() {
         .map(rig => ({ id: rig.id, label: i18n(rig.label), textured: !!rig.texture }));
 }
 
-function getHeldWearer() {
-    return heldWearerId;
-}
-
 function setHeldWearer(id) {
     if (!getHeldWearerChoices().some(choice => choice.id === id)) return false;
     heldWearerId = id;

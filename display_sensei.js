@@ -29,7 +29,7 @@ const PLUGIN_META = {
     bug_tracker: 'https://github.com/HMC-Studios/Display-Sensei/issues'
 };
 
-const PANEL_ICON = 'pan_tool';
+const PANEL_ICON = 'data:image/png;base64,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';
 
 // ---- src/i18n.js ----
 
@@ -1033,6 +1033,10 @@ function isPlainObject(value) {
     return !!value && typeof value === 'object' && !Array.isArray(value);
 }
 
+function roundToFour(value) {
+    return Math.round(value * 10000) / 10000 + 0;
+}
+
 // =========================
 // Messages
 // =========================
@@ -1088,6 +1092,10 @@ function getRoute() {
     if (formatId === BLOCK_FORMAT_ID) return 'block';
     if (formatId === ENTITY_FORMAT_ID) return getBedrockEntityKind() === 'entity' ? 'entity' : 'attachable';
     return 'none';
+}
+
+function canEditAttachable() {
+    return !!Project && getRoute() === 'attachable' && !Modes.animate;
 }
 
 // ---- src/bedrock_spec.js ----
@@ -1735,10 +1743,6 @@ function getWizardEntityCompileSource(event) {
     if (isWizardDialogOpen('item') || isProjectTrackedByWizard('item', Project)) return 'item';
     if (isWizardDialogOpen('entity') || isProjectTrackedByWizard('entity', Project)) return 'entity';
     return null;
-}
-
-function isWizardEntityCompile(event) {
-    return getWizardEntityCompileSource(event) !== null;
 }
 
 function isBlockWizardCompile(event) {
@@ -2786,11 +2790,6 @@ function getLinkedAnimationFiles(project = Project) {
     return entry && entry.animationFiles ? Object.assign({}, entry.animationFiles) : {};
 }
 
-function hasPackLinkScan(project = Project) {
-    let entry = project ? linkCache.get(project) : null;
-    return !!entry && entry.key === getLinkKey(project);
-}
-
 // =========================
 // Reading a file as text
 // =========================
@@ -3532,10 +3531,6 @@ const GIMBAL_EPSILON = 1e-6;
 
 const NEAR_GIMBAL_DEGREES = 1;
 
-function roundMatchedValue(value) {
-    return Math.round(value * 10000) / 10000 + 0;
-}
-
 function drawnSlotMatrix(slotId, values) {
     let side = isLeftHandSlot(slotId) ? -1 : 1;
     let pivotSide = side < 0 && LEFT_HAND_PIVOT_MIRROR ? -1 : 1;
@@ -3573,8 +3568,8 @@ function foldNearGimbal(angles) {
     let side = Math.sign(angles[1]);
     let change = Math.abs(Math.abs(angles[1]) - 90);
     if (!side || change > NEAR_GIMBAL_DEGREES) return null;
-    let rotation = [angles[0] + side * angles[2], side * 90, 0].map(value => sanitizeSlotValue('rotation', roundMatchedValue(value)) + 0);
-    return { rotation, change: roundMatchedValue(change) };
+    let rotation = [angles[0] + side * angles[2], side * 90, 0].map(value => sanitizeSlotValue('rotation', roundToFour(value)) + 0);
+    return { rotation, change: roundToFour(change) };
 }
 
 function valuesFromDrawnMatrix(slotId, matrix) {
@@ -3587,9 +3582,9 @@ function valuesFromDrawnMatrix(slotId, matrix) {
     let folded = foldNearGimbal(rotation);
     if (folded) rotation = folded.rotation;
     let rounded = {
-        translation: [position.x * side, position.y, position.z].map(roundMatchedValue),
-        rotation: [rotation[0], rotation[1] * side, rotation[2] * side].map(roundMatchedValue),
-        scale: scale.toArray().map(roundMatchedValue)
+        translation: [position.x * side, position.y, position.z].map(roundToFour),
+        rotation: [rotation[0], rotation[1] * side, rotation[2] * side].map(roundToFour),
+        scale: scale.toArray().map(roundToFour)
     };
     let clean = channel => rounded[channel].map(value => sanitizeSlotValue(channel, value) + 0);
     let values = {
@@ -3620,13 +3615,6 @@ function computeFirstPersonMatch(slotId, thirdPersonValues) {
 function matchFirstPersonValues(slotId, thirdPersonValues) {
     let match = computeFirstPersonMatch(slotId, thirdPersonValues);
     return match ? match.values : null;
-}
-
-function getMatchedFirstPersonValues(slotId) {
-    let thirdPersonSlotId = FIRST_PERSON_FOR_THIRD_PERSON[slotId];
-    if (!isBlockRouteActive() || !thirdPersonSlotId) return null;
-    ensureSlot(thirdPersonSlotId);
-    return matchFirstPersonValues(slotId, readSlotValues(thirdPersonSlotId));
 }
 
 function showsThirdPersonDefault(thirdPersonSlotId) {
@@ -3676,7 +3664,7 @@ function turnSlotAboutItemAxis(slotId, axis, degrees) {
     let current = readSlotValues(slotId).rotation;
     let rotation = new THREE.Quaternion().setFromEuler(new THREE.Euler(current[0] * toRadians, current[1] * toRadians, current[2] * toRadians, 'XYZ'));
     let turn = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3().setComponent(axisIndex, 1), amount * toRadians);
-    let turned = preferredEulerDegrees(rotation.multiply(turn)).map(value => sanitizeSlotValue('rotation', roundMatchedValue(value)) + 0);
+    let turned = preferredEulerDegrees(rotation.multiply(turn)).map(value => sanitizeSlotValue('rotation', roundToFour(value)) + 0);
     runSlotEdit([slotId], i18n('display_sensei.undo.turn_item'), () => {
         Project.display_settings[slotId].rotation.replace(turned);
         markSlotEdited(slotId, ['rotation']);
@@ -5271,10 +5259,6 @@ const HEAD_BASE_SCALE = 0.625;
 
 const THIRD_PERSON_SLOTS = ['thirdperson_righthand', 'thirdperson_lefthand'];
 const HOLDER_SLOTS = ['thirdperson_righthand', 'thirdperson_lefthand', 'head'];
-
-function isLeftHandSlot(slotId) {
-    return slotId.includes('lefthand');
-}
 
 // =========================
 // Vanilla numbers: third person and head
@@ -7124,10 +7108,6 @@ function followSkinMenuEntry() {
 // =========================
 const STATUE_CENTRE = [0, 8, 0];
 
-function roundStatueValue(value) {
-    return Math.round(value * 10000) / 10000 + 0;
-}
-
 function getStatueHandAreas(poseId) {
     let pose = STAND_POSES.find(entry => entry.id === poseId);
     if (!pose) return null;
@@ -7141,8 +7121,8 @@ function getStatueHandAreas(poseId) {
         let args = toSetBaseArgs(drawn);
         if (left) args = mirrorSetBaseArgs(args);
         areas[slotId] = {
-            rotation: args.slice(3, 6).map(roundStatueValue),
-            translation: args.slice(0, 3).map(roundStatueValue),
+            rotation: args.slice(3, 6).map(roundToFour),
+            translation: args.slice(0, 3).map(roundToFour),
             scale: [1, 1, 1]
         };
     }
@@ -8536,10 +8516,6 @@ function isArmorProject(project = Project) {
     return getWearInfo(project).kind === 'armor';
 }
 
-function isArmorEditAllowed() {
-    return !!Project && getRoute() === 'attachable' && !Modes.animate;
-}
-
 function recordArmorDataEdit(undoLabel, change) {
     if (!Project || getRoute() !== 'attachable' || Undo.current_save) return false;
     let before = JSON.stringify(getProjectData().armor);
@@ -9278,7 +9254,7 @@ const ARMOR_FIXES = {
 };
 
 function applyArmorFix(checkId, fixId, slotId, wearerId) {
-    if (!isArmorEditAllowed() || Undo.current_save || !ARMOR_FIXES[fixId]) return false;
+    if (!canEditAttachable() || Undo.current_save || !ARMOR_FIXES[fixId]) return false;
     let result = collectArmorChecks(slotId, wearerId).find(entry => entry.check.id === checkId);
     if (!result || !result.fix || !result.check.fixes.includes(fixId)) return false;
     return ARMOR_FIXES[fixId](result.fix);
@@ -9384,7 +9360,7 @@ function getGroupDepth(group) {
 }
 
 function bakeFitOffsets(slotId) {
-    if (!findWearSlot(slotId) || !isArmorEditAllowed() || Undo.current_save) return false;
+    if (!findWearSlot(slotId) || !canEditAttachable() || Undo.current_save) return false;
     let saved = getProjectData().armor.fit[slotId];
     if (!saved) return false;
     let missing = Object.keys(saved).filter(name => !findGroupByName(name));
@@ -9885,11 +9861,6 @@ function readAttachableIdentifier(description) {
     return typeof description.identifier === 'string' ? description.identifier : null;
 }
 
-function getHoldLink() {
-    if (!Project || getRoute() !== 'attachable') return null;
-    return analyseHolds();
-}
-
 // =========================
 // The hold files on disk (read only)
 // =========================
@@ -10273,10 +10244,6 @@ function getHoldGimbal(rotation) {
 // =========================
 // What the panel reads
 // =========================
-function isHoldEditingMode() {
-    return !!Project && getRoute() === 'attachable' && !Modes.animate;
-}
-
 function getOffHandMode(link, view) {
     let main = link.cells[holdCellKey(view, 'main_hand')];
     let off = link.cells[holdCellKey(view, 'off_hand')];
@@ -10308,7 +10275,7 @@ function buildHoldState(link, slot) {
         offHand,
         sameAsMain: slot.hand === 'off_hand' && offHand === 'same',
         gimbal: getHoldGimbal(read.values.rotation),
-        editing: isHoldEditingMode()
+        editing: canEditAttachable()
     };
 }
 
@@ -10355,7 +10322,7 @@ function getHoldOverview() {
         bone: link.bone,
         cells: cloneJson(link.cells),
         checks: runHoldRigChecks(getHoldValues),
-        editing: isHoldEditingMode()
+        editing: canEditAttachable()
     };
 }
 
@@ -10446,7 +10413,7 @@ function isOwnHoldEditOpen() {
 }
 
 function beginHoldEdit() {
-    if (!isHoldEditingMode()) return false;
+    if (!canEditAttachable()) return false;
     if (isOwnHoldEditOpen()) return true;
     if (Undo.current_save) return false;
     let before = readHoldSignature();
@@ -10496,7 +10463,7 @@ function cancelHoldEdit() {
 }
 
 function runHoldEdit(label, change) {
-    if (!isHoldEditingMode()) return false;
+    if (!canEditAttachable()) return false;
     let result;
     if (isOwnHoldEditOpen()) {
         result = change();
@@ -10764,7 +10731,7 @@ function computeHoldFirstPerson(start, thirdPerson) {
 }
 
 function matchHoldFirstPerson() {
-    if (!isHoldEditingMode()) return null;
+    if (!canEditAttachable()) return null;
     let link = analyseHolds();
     if (!link.bone) return null;
     let start = getHoldMatchStart(link);
@@ -11426,7 +11393,7 @@ async function restoreHoldFile(path) {
 }
 
 function loadHoldFileValues() {
-    if (!isHoldEditingMode() || Undo.current_save) return false;
+    if (!canEditAttachable() || Undo.current_save) return false;
     let link = analyseHolds();
     let codec = typeof AnimationCodec !== 'undefined' && AnimationCodec.codecs ? AnimationCodec.codecs.bedrock : null;
     if (!codec || typeof codec.loadFile !== 'function') return false;
@@ -12034,10 +12001,6 @@ function getHeldWearerChoices() {
         .map(findWearerRig)
         .filter(rig => rig && findRigBoneName(rig, 'rightItem') && findRigBoneName(rig, 'leftItem'))
         .map(rig => ({ id: rig.id, label: i18n(rig.label), textured: !!rig.texture }));
-}
-
-function getHeldWearer() {
-    return heldWearerId;
 }
 
 function setHeldWearer(id) {

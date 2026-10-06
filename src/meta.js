@@ -17,4 +17,4 @@ const PLUGIN_META = {
     bug_tracker: 'https://github.com/HMC-Studios/Display-Sensei/issues'
 };
 
-const PANEL_ICON = 'pan_tool';
+const PANEL_ICON = 'icon.png';

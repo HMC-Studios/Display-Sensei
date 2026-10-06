@@ -608,10 +608,6 @@ const GIMBAL_EPSILON = 1e-6;
 
 const NEAR_GIMBAL_DEGREES = 1;
 
-function roundMatchedValue(value) {
-    return Math.round(value * 10000) / 10000 + 0;
-}
-
 function drawnSlotMatrix(slotId, values) {
     let side = isLeftHandSlot(slotId) ? -1 : 1;
     let pivotSide = side < 0 && LEFT_HAND_PIVOT_MIRROR ? -1 : 1;
@@ -649,8 +645,8 @@ function foldNearGimbal(angles) {
     let side = Math.sign(angles[1]);
     let change = Math.abs(Math.abs(angles[1]) - 90);
     if (!side || change > NEAR_GIMBAL_DEGREES) return null;
-    let rotation = [angles[0] + side * angles[2], side * 90, 0].map(value => sanitizeSlotValue('rotation', roundMatchedValue(value)) + 0);
-    return { rotation, change: roundMatchedValue(change) };
+    let rotation = [angles[0] + side * angles[2], side * 90, 0].map(value => sanitizeSlotValue('rotation', roundToFour(value)) + 0);
+    return { rotation, change: roundToFour(change) };
 }
 
 function valuesFromDrawnMatrix(slotId, matrix) {
@@ -663,9 +659,9 @@ function valuesFromDrawnMatrix(slotId, matrix) {
     let folded = foldNearGimbal(rotation);
     if (folded) rotation = folded.rotation;
     let rounded = {
-        translation: [position.x * side, position.y, position.z].map(roundMatchedValue),
-        rotation: [rotation[0], rotation[1] * side, rotation[2] * side].map(roundMatchedValue),
-        scale: scale.toArray().map(roundMatchedValue)
+        translation: [position.x * side, position.y, position.z].map(roundToFour),
+        rotation: [rotation[0], rotation[1] * side, rotation[2] * side].map(roundToFour),
+        scale: scale.toArray().map(roundToFour)
     };
     let clean = channel => rounded[channel].map(value => sanitizeSlotValue(channel, value) + 0);
     let values = {
@@ -696,13 +692,6 @@ function computeFirstPersonMatch(slotId, thirdPersonValues) {
 function matchFirstPersonValues(slotId, thirdPersonValues) {
     let match = computeFirstPersonMatch(slotId, thirdPersonValues);
     return match ? match.values : null;
-}
-
-function getMatchedFirstPersonValues(slotId) {
-    let thirdPersonSlotId = FIRST_PERSON_FOR_THIRD_PERSON[slotId];
-    if (!isBlockRouteActive() || !thirdPersonSlotId) return null;
-    ensureSlot(thirdPersonSlotId);
-    return matchFirstPersonValues(slotId, readSlotValues(thirdPersonSlotId));
 }
 
 function showsThirdPersonDefault(thirdPersonSlotId) {
@@ -752,7 +741,7 @@ function turnSlotAboutItemAxis(slotId, axis, degrees) {
     let current = readSlotValues(slotId).rotation;
     let rotation = new THREE.Quaternion().setFromEuler(new THREE.Euler(current[0] * toRadians, current[1] * toRadians, current[2] * toRadians, 'XYZ'));
     let turn = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3().setComponent(axisIndex, 1), amount * toRadians);
-    let turned = preferredEulerDegrees(rotation.multiply(turn)).map(value => sanitizeSlotValue('rotation', roundMatchedValue(value)) + 0);
+    let turned = preferredEulerDegrees(rotation.multiply(turn)).map(value => sanitizeSlotValue('rotation', roundToFour(value)) + 0);
     runSlotEdit([slotId], i18n('display_sensei.undo.turn_item'), () => {
         Project.display_settings[slotId].rotation.replace(turned);
         markSlotEdited(slotId, ['rotation']);

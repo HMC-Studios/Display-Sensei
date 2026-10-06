@@ -10,6 +10,7 @@ const LANG_DIR = path.join(ROOT, 'lang');
 const META_FILE = path.join(SRC_DIR, 'meta.js');
 const ENTRY_FILE = path.join(ROOT, 'plugins.json.entry.json');
 const TRANSLATIONS_MARKER = '/*@@DS_TRANSLATIONS@@*/{}';
+const PANEL_ICON_DECLARATION = /const PANEL_ICON = '([^']+)';/g;
 const SOURCE_ORDER = [
     'meta.js',
     'i18n.js',
@@ -151,6 +152,23 @@ function checkI18nKeys(sources, englishTable) {
     }
 }
 
+function embedPanelIcon(body) {
+    let matches = [...body.matchAll(PANEL_ICON_DECLARATION)];
+    if (matches.length !== 1) {
+        fail(`expected one "const PANEL_ICON = '...';" in src/, found ${matches.length}`);
+    }
+    let [declaration, value] = matches[0];
+    if (!value.endsWith('.png')) return body;
+    let file = path.join(ROOT, value);
+    let data;
+    try {
+        data = fs.readFileSync(file);
+    } catch (error) {
+        fail(`could not read the panel icon ${relative(file)}: ${error.message}`);
+    }
+    return body.replace(declaration, `const PANEL_ICON = 'data:image/png;base64,${data.toString('base64')}';`);
+}
+
 function writeOutputs(outputs) {
     let replaced = [];
     try {
@@ -192,6 +210,7 @@ function build() {
         fail(`expected the marker ${TRANSLATIONS_MARKER} exactly once in src/, found it ${markerCount} time(s)`);
     }
     body = body.split(TRANSLATIONS_MARKER).join(JSON.stringify(translations, null, 4));
+    body = embedPanelIcon(body);
 
     let banner = [
         '/*',

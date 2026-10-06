@@ -28,10 +28,6 @@ const HEAD_BASE_SCALE = 0.625;
 const THIRD_PERSON_SLOTS = ['thirdperson_righthand', 'thirdperson_lefthand'];
 const HOLDER_SLOTS = ['thirdperson_righthand', 'thirdperson_lefthand', 'head'];
 
-function isLeftHandSlot(slotId) {
-    return slotId.includes('lefthand');
-}
-
 // =========================
 // Vanilla numbers: third person and head
 // =========================
@@ -1880,10 +1876,6 @@ function followSkinMenuEntry() {
 // =========================
 const STATUE_CENTRE = [0, 8, 0];
 
-function roundStatueValue(value) {
-    return Math.round(value * 10000) / 10000 + 0;
-}
-
 function getStatueHandAreas(poseId) {
     let pose = STAND_POSES.find(entry => entry.id === poseId);
     if (!pose) return null;
@@ -1897,8 +1889,8 @@ function getStatueHandAreas(poseId) {
         let args = toSetBaseArgs(drawn);
         if (left) args = mirrorSetBaseArgs(args);
         areas[slotId] = {
-            rotation: args.slice(3, 6).map(roundStatueValue),
-            translation: args.slice(0, 3).map(roundStatueValue),
+            rotation: args.slice(3, 6).map(roundToFour),
+            translation: args.slice(0, 3).map(roundToFour),
             scale: [1, 1, 1]
         };
     }

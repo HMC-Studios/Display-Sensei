@@ -443,11 +443,6 @@ function readAttachableIdentifier(description) {
     return typeof description.identifier === 'string' ? description.identifier : null;
 }
 
-function getHoldLink() {
-    if (!Project || getRoute() !== 'attachable') return null;
-    return analyseHolds();
-}
-
 // =========================
 // The hold files on disk (read only)
 // =========================

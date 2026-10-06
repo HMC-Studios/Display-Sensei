@@ -154,10 +154,6 @@ function getHoldGimbal(rotation) {
 // =========================
 // What the panel reads
 // =========================
-function isHoldEditingMode() {
-    return !!Project && getRoute() === 'attachable' && !Modes.animate;
-}
-
 function getOffHandMode(link, view) {
     let main = link.cells[holdCellKey(view, 'main_hand')];
     let off = link.cells[holdCellKey(view, 'off_hand')];
@@ -189,7 +185,7 @@ function buildHoldState(link, slot) {
         offHand,
         sameAsMain: slot.hand === 'off_hand' && offHand === 'same',
         gimbal: getHoldGimbal(read.values.rotation),
-        editing: isHoldEditingMode()
+        editing: canEditAttachable()
     };
 }
 
@@ -236,7 +232,7 @@ function getHoldOverview() {
         bone: link.bone,
         cells: cloneJson(link.cells),
         checks: runHoldRigChecks(getHoldValues),
-        editing: isHoldEditingMode()
+        editing: canEditAttachable()
     };
 }
 
@@ -327,7 +323,7 @@ function isOwnHoldEditOpen() {
 }
 
 function beginHoldEdit() {
-    if (!isHoldEditingMode()) return false;
+    if (!canEditAttachable()) return false;
     if (isOwnHoldEditOpen()) return true;
     if (Undo.current_save) return false;
     let before = readHoldSignature();
@@ -377,7 +373,7 @@ function cancelHoldEdit() {
 }
 
 function runHoldEdit(label, change) {
-    if (!isHoldEditingMode()) return false;
+    if (!canEditAttachable()) return false;
     let result;
     if (isOwnHoldEditOpen()) {
         result = change();
@@ -645,7 +641,7 @@ function computeHoldFirstPerson(start, thirdPerson) {
 }
 
 function matchHoldFirstPerson() {
-    if (!isHoldEditingMode()) return null;
+    if (!canEditAttachable()) return null;
     let link = analyseHolds();
     if (!link.bone) return null;
     let start = getHoldMatchStart(link);

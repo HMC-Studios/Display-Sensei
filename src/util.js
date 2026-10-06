@@ -126,6 +126,10 @@ function isPlainObject(value) {
     return !!value && typeof value === 'object' && !Array.isArray(value);
 }
 
+function roundToFour(value) {
+    return Math.round(value * 10000) / 10000 + 0;
+}
+
 // =========================
 // Messages
 // =========================
@@ -181,4 +185,8 @@ function getRoute() {
     if (formatId === BLOCK_FORMAT_ID) return 'block';
     if (formatId === ENTITY_FORMAT_ID) return getBedrockEntityKind() === 'entity' ? 'entity' : 'attachable';
     return 'none';
+}
+
+function canEditAttachable() {
+    return !!Project && getRoute() === 'attachable' && !Modes.animate;
 }

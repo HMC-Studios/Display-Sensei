@@ -208,10 +208,6 @@ function isArmorProject(project = Project) {
     return getWearInfo(project).kind === 'armor';
 }
 
-function isArmorEditAllowed() {
-    return !!Project && getRoute() === 'attachable' && !Modes.animate;
-}
-
 function recordArmorDataEdit(undoLabel, change) {
     if (!Project || getRoute() !== 'attachable' || Undo.current_save) return false;
     let before = JSON.stringify(getProjectData().armor);
@@ -950,7 +946,7 @@ const ARMOR_FIXES = {
 };
 
 function applyArmorFix(checkId, fixId, slotId, wearerId) {
-    if (!isArmorEditAllowed() || Undo.current_save || !ARMOR_FIXES[fixId]) return false;
+    if (!canEditAttachable() || Undo.current_save || !ARMOR_FIXES[fixId]) return false;
     let result = collectArmorChecks(slotId, wearerId).find(entry => entry.check.id === checkId);
     if (!result || !result.fix || !result.check.fixes.includes(fixId)) return false;
     return ARMOR_FIXES[fixId](result.fix);
@@ -1056,7 +1052,7 @@ function getGroupDepth(group) {
 }
 
 function bakeFitOffsets(slotId) {
-    if (!findWearSlot(slotId) || !isArmorEditAllowed() || Undo.current_save) return false;
+    if (!findWearSlot(slotId) || !canEditAttachable() || Undo.current_save) return false;
     let saved = getProjectData().armor.fit[slotId];
     if (!saved) return false;
     let missing = Object.keys(saved).filter(name => !findGroupByName(name));

@@ -604,7 +604,7 @@ async function restoreHoldFile(path) {
 }
 
 function loadHoldFileValues() {
-    if (!isHoldEditingMode() || Undo.current_save) return false;
+    if (!canEditAttachable() || Undo.current_save) return false;
     let link = analyseHolds();
     let codec = typeof AnimationCodec !== 'undefined' && AnimationCodec.codecs ? AnimationCodec.codecs.bedrock : null;
     if (!codec || typeof codec.loadFile !== 'function') return false;

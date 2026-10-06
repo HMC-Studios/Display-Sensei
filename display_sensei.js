@@ -1031,6 +1031,10 @@ function roundToFour(value) {
     return Math.round(value * 10000) / 10000 + 0;
 }
 
+function getFileBaseName(path) {
+    return String(path || '').split(/[\\/]/).pop();
+}
+
 // =========================
 // Messages
 // =========================
@@ -2044,7 +2048,7 @@ function isInsideFolder(folder, path) {
 }
 
 function getGeometryFileStem(path) {
-    return PathModule.basename(path).replace(/\.json$/i, '').replace(/\.geo$/i, '');
+    return getFileBaseName(path).replace(/\.json$/i, '').replace(/\.geo$/i, '');
 }
 
 // =========================
@@ -6823,8 +6827,8 @@ function applyGlowTextureTo(reference) {
     reference.model.traverse(object => {
         let map = object.isMesh && object.material && object.material.map;
         if (map && map.image && isFrameBoardTexture(map.image.src) && !map.image.src.startsWith('data:')) {
+            map.image.addEventListener('load', () => { map.needsUpdate = true; }, { once: true });
             map.image.src = glowFrameTexture;
-            map.needsUpdate = true;
         }
     });
 }
@@ -11074,7 +11078,7 @@ function getHoldWriteState(force = false) {
         let changedSinceRead = !!record && !!record.hash && !!file && file.hash !== record.hash;
         return {
             path,
-            name: PathModule.basename(path),
+            name: getFileBaseName(path),
             exists: !!file,
             readable: !!file && !!file.json,
             pending: pending ? pending.changes.length : 0,
@@ -11093,7 +11097,8 @@ function getHoldWriteState(force = false) {
         skipped: plan.skipped,
         missing,
         attachable: link.attachable,
-        target: getProjectData().holds.target
+        target: getProjectData().holds.target,
+        desktopOnly: !isDesktopApp()
     };
 }
 
@@ -16017,7 +16022,8 @@ const PANEL_TEMPLATE = `
                 :data-ds-hold-pending="holdWrite ? String(holdWrite.pending) : null"
             >
                 <div class="ds-section-label">{{ t('display_sensei.hold_write.title') }}<ds-tip :text="t('display_sensei.hold_write.title_tip')"></ds-tip></div>
-                <template v-if="holdWrite">
+                <p v-if="holdWrite && holdWrite.desktopOnly" class="ds-empty-note" data-ds-note="hold_desktop_only">{{ t('display_sensei.message.hold_desktop_only') }}</p>
+                <template v-else-if="holdWrite">
                     <p
                         v-for="file in holdWrite.files"
                         :key="file.path"
@@ -16497,7 +16503,7 @@ function buildPanelComponent() {
                 return !!this.holdWrite && this.holdWrite.files.some(file => file.changedAfterWrite);
             },
             canWriteHolds() {
-                if (!this.holdWrite || this.holdBusy) return false;
+                if (!this.holdWrite || this.holdBusy || this.holdWrite.desktopOnly) return false;
                 return (this.holdWrite.pending > 0 && this.holdWrite.files.some(file => file.exists)) || this.holdWrite.noFile.length > 0;
             },
             getHoldBackupFile() {
@@ -17729,7 +17735,7 @@ function buildPanelComponent() {
             showHoldWriteMessage(result) {
                 let key = result ? HOLD_WRITE_MESSAGES[result.status] : null;
                 if (!key) return;
-                let written = result.written && result.written.length ? result.written.map(entry => PathModule.basename(entry.path)).join(', ') : '';
+                let written = result.written && result.written.length ? result.written.map(entry => getFileBaseName(entry.path)).join(', ') : '';
                 Blockbench.showQuickMessage(this.tf(key, { file: written }), QUICK_MESSAGE_MS);
             },
             async restoreHolds() {
@@ -17749,7 +17755,7 @@ function buildPanelComponent() {
                 else if (result && result.status === 'failed') showMessage('display_sensei.message.hold_failed');
             },
             getFileName(path) {
-                return String(path || '').split(/[\\/]/).pop();
+                return getFileBaseName(path);
             },
             clearTarget() {
                 this.releasePointer();

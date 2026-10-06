@@ -1688,8 +1688,8 @@ function applyGlowTextureTo(reference) {
     reference.model.traverse(object => {
         let map = object.isMesh && object.material && object.material.map;
         if (map && map.image && isFrameBoardTexture(map.image.src) && !map.image.src.startsWith('data:')) {
+            map.image.addEventListener('load', () => { map.needsUpdate = true; }, { once: true });
             map.image.src = glowFrameTexture;
-            map.needsUpdate = true;
         }
     });
 }

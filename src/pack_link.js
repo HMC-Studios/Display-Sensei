@@ -426,7 +426,7 @@ function isInsideFolder(folder, path) {
 }
 
 function getGeometryFileStem(path) {
-    return PathModule.basename(path).replace(/\.json$/i, '').replace(/\.geo$/i, '');
+    return getFileBaseName(path).replace(/\.json$/i, '').replace(/\.geo$/i, '');
 }
 
 // =========================

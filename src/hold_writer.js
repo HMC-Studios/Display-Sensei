@@ -382,7 +382,7 @@ function getHoldWriteState(force = false) {
         let changedSinceRead = !!record && !!record.hash && !!file && file.hash !== record.hash;
         return {
             path,
-            name: PathModule.basename(path),
+            name: getFileBaseName(path),
             exists: !!file,
             readable: !!file && !!file.json,
             pending: pending ? pending.changes.length : 0,
@@ -401,7 +401,8 @@ function getHoldWriteState(force = false) {
         skipped: plan.skipped,
         missing,
         attachable: link.attachable,
-        target: getProjectData().holds.target
+        target: getProjectData().holds.target,
+        desktopOnly: !isDesktopApp()
     };
 }
 

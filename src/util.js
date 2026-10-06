@@ -130,6 +130,10 @@ function roundToFour(value) {
     return Math.round(value * 10000) / 10000 + 0;
 }
 
+function getFileBaseName(path) {
+    return String(path || '').split(/[\\/]/).pop();
+}
+
 // =========================
 // Messages
 // =========================

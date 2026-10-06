@@ -41,6 +41,7 @@ function readShownTables(keyframe, channel) {
             let calculated = keyframe.calc(HOLD_AXIS_LETTERS[axis], 0);
             if (Number.isFinite(calculated)) value = isHoldAxisFlipped(channel, axis) ? -calculated : calculated;
         } catch (error) {
+            console.warn(LOG_PREFIX, 'Could not read a hold value:', error);
         }
         return fillHoldTable(() => roundHoldNumber(value));
     });

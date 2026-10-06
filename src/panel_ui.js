@@ -650,6 +650,7 @@ function saveUiState(state) {
     try {
         localStorage.setItem(UI_STATE_STORAGE_KEY, JSON.stringify(state));
     } catch (error) {
+        console.warn(LOG_PREFIX, 'Could not save the panel state:', error);
     }
 }
 

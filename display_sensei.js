@@ -875,20 +875,23 @@ const DS_TRANSLATIONS = {
 
 const PLUGIN_LANGUAGE_STORAGE_KEY = 'display_sensei_plugin_language';
 
-function getActiveLanguageCode() {
-    return Language.code || 'en';
+function addPluginTranslations() {
+    for (let [code, table] of Object.entries(DS_TRANSLATIONS)) {
+        Language.addTranslations(code, table);
+    }
+    return {
+        delete() {
+            for (let table of Object.values(DS_TRANSLATIONS)) {
+                for (let [key, text] of Object.entries(table)) {
+                    if (Language.data[key] === text) delete Language.data[key];
+                }
+            }
+        }
+    };
 }
 
 function i18n(key) {
-    let activeTable = DS_TRANSLATIONS[getActiveLanguageCode()];
-    if (activeTable && typeof activeTable[key] === 'string') {
-        return activeTable[key];
-    }
-    let englishTable = DS_TRANSLATIONS.en;
-    if (englishTable && typeof englishTable[key] === 'string') {
-        return englishTable[key];
-    }
-    return key;
+    return tl(key);
 }
 
 function i18nFormat(key, values) {
@@ -2855,8 +2858,9 @@ function readFileDates(rows, rootPaths, scopedFs) {
         if (row.exists !== true || !root) continue;
         try {
             let mtime = scopedFs.statSync(joinPackPath(root, row.path)).mtimeMs;
-            if (typeof mtime === 'number' && Number.isFinite(mtime)) row.mtime = mtime;
+            row.mtime = typeof mtime === 'number' && Number.isFinite(mtime) ? mtime : null;
         } catch (error) {
+            row.mtime = null;
         }
     }
     return rows;
@@ -10156,6 +10160,7 @@ function readShownTables(keyframe, channel) {
             let calculated = keyframe.calc(HOLD_AXIS_LETTERS[axis], 0);
             if (Number.isFinite(calculated)) value = isHoldAxisFlipped(channel, axis) ? -calculated : calculated;
         } catch (error) {
+            console.warn(LOG_PREFIX, 'Could not read a hold value:', error);
         }
         return fillHoldTable(() => roundHoldNumber(value));
     });
@@ -14991,6 +14996,7 @@ function saveUiState(state) {
     try {
         localStorage.setItem(UI_STATE_STORAGE_KEY, JSON.stringify(state));
     } catch (error) {
+        console.warn(LOG_PREFIX, 'Could not save the panel state:', error);
     }
 }
 
@@ -18125,6 +18131,7 @@ function rememberOpenPanel() {
     try {
         if (getPanel()) localStorage.setItem(REOPEN_PANEL_STORAGE_KEY, '1');
     } catch (error) {
+        console.warn(LOG_PREFIX, 'Could not remember the open panel:', error);
     }
 }
 
@@ -18143,6 +18150,7 @@ function takeReopenPanelNote() {
 // =========================
 function onload() {
     try {
+        track(addPluginTranslations());
         track(injectPanelCss());
 
         let openAction = track(createOpenAction());
@@ -18182,6 +18190,7 @@ function onuninstall() {
         localStorage.removeItem(REOPEN_PANEL_STORAGE_KEY);
         localStorage.removeItem(CALIBRATED_HOLDS_STORAGE_KEY);
     } catch (error) {
+        console.warn(LOG_PREFIX, 'Could not remove the saved settings:', error);
     }
 }
 

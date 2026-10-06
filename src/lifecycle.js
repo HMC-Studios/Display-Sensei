@@ -36,6 +36,7 @@ function rememberOpenPanel() {
     try {
         if (getPanel()) localStorage.setItem(REOPEN_PANEL_STORAGE_KEY, '1');
     } catch (error) {
+        console.warn(LOG_PREFIX, 'Could not remember the open panel:', error);
     }
 }
 
@@ -54,6 +55,7 @@ function takeReopenPanelNote() {
 // =========================
 function onload() {
     try {
+        track(addPluginTranslations());
         track(injectPanelCss());
 
         let openAction = track(createOpenAction());
@@ -93,6 +95,7 @@ function onuninstall() {
         localStorage.removeItem(REOPEN_PANEL_STORAGE_KEY);
         localStorage.removeItem(CALIBRATED_HOLDS_STORAGE_KEY);
     } catch (error) {
+        console.warn(LOG_PREFIX, 'Could not remove the saved settings:', error);
     }
 }
 

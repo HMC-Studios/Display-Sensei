@@ -1242,8 +1242,9 @@ function readFileDates(rows, rootPaths, scopedFs) {
         if (row.exists !== true || !root) continue;
         try {
             let mtime = scopedFs.statSync(joinPackPath(root, row.path)).mtimeMs;
-            if (typeof mtime === 'number' && Number.isFinite(mtime)) row.mtime = mtime;
+            row.mtime = typeof mtime === 'number' && Number.isFinite(mtime) ? mtime : null;
         } catch (error) {
+            row.mtime = null;
         }
     }
     return rows;

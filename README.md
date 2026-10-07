@@ -2,14 +2,19 @@
 
 <img src="icon.png" width="64" alt="Display Sensei icon">
 
-A Blockbench plugin for Minecraft: Bedrock Edition. It sets how your models display in the game:
+A Blockbench plugin for Minecraft: Bedrock Edition. It lets you set up how your Bedrock models look in game.
 
-- **Blocks:** held in first and third person, in item frames, on the ground, on shelves, in flower pots, in the inventory and on the head.
-- **3D items (attachables):** how they sit in the main hand and the off hand, in first and third person, written into the pack's hold animation.
-- **Armor and other worn items:** on players, armor stands and mobs, with a fit check, bone and pivot fixes, and pose tests.
-- **Your pack:** the pack files of the open model (blocks, items, armor, mobs), with or without Blockbench's Item, Block and Entity Wizards.
+**Blocks:** held in first and third person, in item frames, on the ground, on shelves, in flower pots, in the inventory and on your head.
 
-For Bedrock, Blockbench's own Display Mode only covers block models. Display Sensei shows everything on Bedrock reference models and poses, and matches first person to third person.
+**3D items (attachables):** how they sit in your main hand and off hand, first and third person. It can write the hold straight into your pack's hold animation file.
+
+**Armor:** see it on players, armor stands and mobs. It checks the fit, can fix bone names and pivots, and lets you test it in different poses.
+
+**Your pack:** shows the pack files that go with the model you have open, whether you used Blockbench's Item, Block and Entity Wizards or made the pack by hand.
+
+Blockbench's Display mode only covers block models on Bedrock, so this shows everything on Bedrock models and poses instead. It can also match first person to third person so they line up.
+
+Writing into your pack and the Your pack card need the desktop app.
 
 ## Usage
 
